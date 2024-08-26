@@ -41,7 +41,10 @@ function updatePlayerCount() {
     let convertedToNums = playerCards.map(card => cardsObj[card]);
     const sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
     playerCount.textContent = sumOfCards;
-    if (sumOfCards > 21) {
+    if (playerCards.includes('A') && sumOfCards > 21) {
+        playerCount.textContent = sumOfCards - 10;
+    }
+    else if (sumOfCards > 21) {
         playerCount.textContent = "Busted, Dealer Wins";
         disableButtons();
     } else if (sumOfCards === 21) {
