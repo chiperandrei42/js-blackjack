@@ -1,0 +1,52 @@
+div {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+body {
+    background-color: black;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.secondDiv {
+    justify-content: center;
+    display: flex;
+    flex-direction: row;
+    gap:30px;
+}
+
+.players-wrapper div {
+    margin-bottom: 40px;
+    border-radius:15px;
+    width:500px;
+    height:250px;
+    display:flex;
+    justify-content: center;
+    background-color: darkgreen;
+}
+
+button {
+    width:100px;
+    height:50px;
+    border: 3px solid goldenrod;
+    background-color: honeydew;
+    border-radius: 10px;
+    transition:0.3s;
+    cursor:pointer;
+}
+button:hover {
+    background-color:darkgreen;
+}
+
+p {
+    font-size:1.5vw;
+    margin:15px;
+}
+
+.player-and-dealer {
+    padding:15px;
+    border-radius:10px;
+    border:3px solid goldenrod;
+    background-color:black;
+    color:honeydew;
+}
