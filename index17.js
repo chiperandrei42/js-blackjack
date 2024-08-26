@@ -37,14 +37,22 @@ const dealerCards = [cards.shift()];
 
 let dealerStands = false;
 
+function aceHandling(sum, cards) {
+    let aceCount = cards.filter(card => card === 'A').length;
+    while (sum > 21 && aceCount > 0) {
+        sum -= 10;
+        aceCount--;
+    }
+    return sum;
+}
+
 function updatePlayerCount() {
     let convertedToNums = playerCards.map(card => cardsObj[card]);
-    const sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
+    let sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
+    sumOfCards = aceHandling(sumOfCards, playerCards);
     playerCount.textContent = sumOfCards;
-    if (playerCards.includes('A') && sumOfCards > 21) {
-        playerCount.textContent = sumOfCards - 10;
-    }
-    else if (sumOfCards > 21) {
+    
+    if (sumOfCards > 21) {
         playerCount.textContent = "Busted, Dealer Wins";
         disableButtons();
     } else if (sumOfCards === 21) {
@@ -55,11 +63,10 @@ function updatePlayerCount() {
 
 function updateDealerCount() {
     let convertedToNums = dealerCards.map(card => cardsObj[card]);
-    const sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
+    let sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
+    sumOfCards = aceHandling(sumOfCards, dealerCards);
     dealerCount.textContent = sumOfCards;
-    if (dealerCards.includes('A') && sumOfCards > 21) {
-        dealerCount.textContent = sumOfCards - 10;
-    }
+    
 }
 
 function checkInitialGameState() {
@@ -87,38 +94,43 @@ function revealDealerSecondCard() {
     dealerDrawedCards.textContent = `Cards: ` + dealerCards.join(', ');
     updateDealerCount();
 
-    if (parseInt(dealerCount.textContent) <= 21 && parseInt(dealerCount.textContent) <= parseInt(playerCount.textContent)) {
+    const dealerTotal = parseInt(dealerCount.textContent, 10);
+    const playerTotal = parseInt(playerCount.textContent, 10);
+
+    if (dealerTotal <= 21 && dealerTotal <= playerTotal) {
         setTimeout(dealerTurnWithDelay, 500);
-    } else if (parseInt(dealerCount.textContent) > 21) {
-        dealerCount.textContent = "Dealer Busted, Player Wins";
-        disableButtons();
-    } else if (parseInt(dealerCount.textContent) > parseInt(playerCount.textContent)) {
-        dealerCount.textContent += " (Dealer Wins)";
-        disableButtons();
-    } else if (parseInt(dealerCount.textContent) === parseInt(playerCount.textContent)) {
-        dealerCount.textContent += " (Push)";
-        disableButtons();
+    } else {
+        determineOutcome(dealerTotal, playerTotal);
     }
 }
 
 function dealerTurnWithDelay() {
-    if (parseInt(dealerCount.textContent) <= 21 && parseInt(dealerCount.textContent) <= parseInt(playerCount.textContent)) {
-        setTimeout(function() {
-            dealerHitCards();
+    const dealerTotal = parseInt(dealerCount.textContent, 10);
+    const playerTotal = parseInt(playerCount.textContent, 10);
 
-            if (parseInt(dealerCount.textContent) > 21) {
-                dealerCount.textContent = "Dealer Busted, Player Wins";
-                disableButtons();
-            } else if (parseInt(dealerCount.textContent) > parseInt(playerCount.textContent)) {
-                dealerCount.textContent += " (Dealer Wins)";
-                dealerStands = true;
-                disableButtons();
-            } else {
-                dealerTurnWithDelay();
-            }
+    if (dealerTotal < 17) {
+        setTimeout(() => {
+            dealerHitCards();
+            dealerTurnWithDelay();
         }, 500);
+    } else {
+        determineOutcome(dealerTotal, playerTotal);
     }
 }
+
+function determineOutcome(dealerTotal, playerTotal) {
+    if (dealerTotal > 21) {
+        dealerCount.textContent = "Dealer Busted, Player Wins";
+    } else if (dealerTotal > playerTotal) {
+        dealerCount.textContent = `Dealer Wins (${dealerTotal})`;
+    } else if (dealerTotal < playerTotal) {
+        dealerCount.textContent = `Player Wins (${dealerTotal})`;
+    } else if (dealerTotal === playerTotal) {
+        dealerCount.textContent = "Push";
+    }
+    disableButtons();
+}
+
 
 function playerHitCards() {
     if (dealerStands) return;
@@ -154,6 +166,7 @@ hitBtn.addEventListener('click', function() {
 standBtn.addEventListener('click', function() {
     if (!dealerStands) {
         revealDealerSecondCardWithDelay();
+        dealerStands = true;
     }
 });
 
