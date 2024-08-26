@@ -72,7 +72,7 @@ function updateDealerCount() {
 function checkInitialGameState() {
     updatePlayerCount();
 
-    const playerTotal = parseInt(playerCount.textContent);
+    const playerTotal = parseInt(playerCount.textContent, 10);
     if (playerTotal > 21) {
         dealerCount.textContent = "Dealer Wins";
         disableButtons();
@@ -151,7 +151,7 @@ function dealerHitCards() {
     dealerDrawedCards.textContent = dealerCards.join(', ');
     updateDealerCount();
 
-    if (parseInt(dealerCount.textContent) > 21) {
+    if (parseInt(dealerCount.textContent, 10) > 21) {
         dealerCount.textContent = "Dealer Busted, Player Wins";
         disableButtons();
     }
