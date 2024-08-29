@@ -43,6 +43,7 @@ function fisherYates(array) {
         [array[i], array[random]] = [array[random], array[i]];
     }
 }
+console.log(cards);
 
 const playerCards = [cards.shift(), cards.shift()];
 const dealerCards = [cards.shift()];
@@ -58,56 +59,38 @@ function aceHandling(sum, cards) {
     return sum;
 }
 
-function calculateSum(cards) {
-    let convertedToNums = cards.map(card => cardsObj[card]);
-    let sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
-    return aceHandling(sumOfCards, cards);
-}
-
 function updatePlayerCount() {
-    let sumOfCards = calculateSum(playerCards);
+    let convertedToNums = playerCards.map(card => cardsObj[card]);
+    let sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
+    sumOfCards = aceHandling(sumOfCards, playerCards);
     playerCount.textContent = sumOfCards;
-    determineGameOutcome();
-}
-
-function updateDealerCount() {
-    let sumOfCards = calculateSum(dealerCards);
-    dealerCount.textContent = sumOfCards;
-    determineGameOutcome();
-}
-
-function determineGameOutcome() {
-    const playerTotal = parseInt(playerCount.textContent, 10);
-    const dealerTotal = parseInt(dealerCount.textContent, 10);
-
-    if (playerTotal > 21) {
-        playerCount.textContent = `Busted, Dealer Wins (${playerTotal})`;
+    
+    if (sumOfCards > 21) {
+        playerCount.textContent = "Busted, Dealer Wins";
         disableButtons();
-    } else if (playerTotal === 21) {
+    } else if (sumOfCards === 21) {
         playerCount.textContent = "Blackjack! You hit 21";
         disableButtons();
     }
+}
 
-    if (dealerStands) {
-        if (dealerTotal < 17) {
-            dealerTurnWithDelay();
-        }
-        else if (dealerTotal > 21) {
-            dealerCount.textContent = `Dealer Busted, Player Wins (${dealerTotal})`;
-        }
-        else if (dealerTotal > playerTotal) {
-            dealerCount.textContent = `Dealer Wins (${dealerTotal})`;
-        } else if (dealerTotal < playerTotal) {
-            dealerCount.textContent = `Player Wins (${dealerTotal})`;
-        } else if (dealerTotal === playerTotal) {
-            dealerCount.textContent = `Push (${dealerTotal})`;
-        }
-        disableButtons();
-    }
+function updateDealerCount() {
+    let convertedToNums = dealerCards.map(card => cardsObj[card]);
+    let sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
+    sumOfCards = aceHandling(sumOfCards, dealerCards);
+    dealerCount.textContent = sumOfCards;
+    
 }
 
 function checkInitialGameState() {
     updatePlayerCount();
+
+    const playerTotal = parseInt(playerCount.textContent, 10);
+    if (playerTotal > 21) {
+        dealerCount.textContent = "Dealer Wins";
+        disableButtons();
+    }
+
     playerDrawedCards.textContent = `Cards: ` + playerCards.join(', ');
     dealerDrawedCards.textContent = `Cards: ` + dealerCards.join(', ') + ', [hidden]';
 }
@@ -130,20 +113,37 @@ function revealDealerSecondCard() {
     if (dealerTotal <= 21 && dealerTotal <= playerTotal) {
         setTimeout(dealerTurnWithDelay, 500);
     } else {
-        determineGameOutcome();
+        determineOutcome(dealerTotal, playerTotal);
     }
 }
 
 function dealerTurnWithDelay() {
-    if (parseInt(dealerCount.textContent, 10) < 17) {
+    const dealerTotal = parseInt(dealerCount.textContent, 10);
+    const playerTotal = parseInt(playerCount.textContent, 10);
+
+    if (dealerTotal < 17) {
         setTimeout(() => {
             dealerHitCards();
             dealerTurnWithDelay();
         }, 500);
     } else {
-        determineGameOutcome();
+        determineOutcome(dealerTotal, playerTotal);
     }
 }
+
+function determineOutcome(dealerTotal, playerTotal) {
+    if (dealerTotal > 21) {
+        dealerCount.textContent = `Dealer Busted, Player Wins (${dealerTotal})`;
+    } else if (dealerTotal > playerTotal) {
+        dealerCount.textContent = `Dealer Wins (${dealerTotal})`;
+    } else if (dealerTotal < playerTotal) {
+        dealerCount.textContent = `Player Wins (${dealerTotal})`;
+    } else if (dealerTotal === playerTotal) {
+        dealerCount.textContent = `Push (${dealerTotal})`;
+    }
+    disableButtons();
+}
+
 
 function playerHitCards() {
     if (dealerStands) return;
@@ -163,6 +163,11 @@ function dealerHitCards() {
     dealerCards.push(firstElement);
     dealerDrawedCards.textContent = dealerCards.join(', ');
     updateDealerCount();
+
+    if (parseInt(dealerCount.textContent, 10) > 21) {
+        dealerCount.textContent = "Dealer Busted, Player Wins";
+        disableButtons();
+    }
 }
 
 hitBtn.addEventListener('click', function() {
