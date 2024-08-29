@@ -44,8 +44,6 @@ function fisherYates(array) {
     }
 }
 
-console.log(cards);
-
 const playerCards = [cards.shift(), cards.shift()];
 const dealerCards = [cards.shift()];
 
@@ -69,27 +67,47 @@ function calculateSum(cards) {
 function updatePlayerCount() {
     let sumOfCards = calculateSum(playerCards);
     playerCount.textContent = sumOfCards;
-    
-    if (sumOfCards === 21) {
-        playerCount.textContent = "Blackjack! You hit 21";
-        disableButtons();
-    }
+    determineGameOutcome();
 }
 
 function updateDealerCount() {
     let sumOfCards = calculateSum(dealerCards);
     dealerCount.textContent = sumOfCards;
+    determineGameOutcome();
+}
+
+function determineGameOutcome() {
+    const playerTotal = parseInt(playerCount.textContent, 10);
+    const dealerTotal = parseInt(dealerCount.textContent, 10);
+
+    if (playerTotal > 21) {
+        playerCount.textContent = `Busted, Dealer Wins (${playerTotal})`;
+        disableButtons();
+    } else if (playerTotal === 21) {
+        playerCount.textContent = "Blackjack! You hit 21";
+        disableButtons();
+    }
+
+    if (dealerStands) {
+        if (dealerTotal < 17) {
+            dealerTurnWithDelay();
+        }
+        else if (dealerTotal > 21) {
+            dealerCount.textContent = `Dealer Busted, Player Wins (${dealerTotal})`;
+        }
+        else if (dealerTotal > playerTotal) {
+            dealerCount.textContent = `Dealer Wins (${dealerTotal})`;
+        } else if (dealerTotal < playerTotal) {
+            dealerCount.textContent = `Player Wins (${dealerTotal})`;
+        } else if (dealerTotal === playerTotal) {
+            dealerCount.textContent = `Push (${dealerTotal})`;
+        }
+        disableButtons();
+    }
 }
 
 function checkInitialGameState() {
     updatePlayerCount();
-
-    const playerTotal = parseInt(playerCount.textContent, 10);
-    if (playerTotal > 21) {
-        dealerCount.textContent = "Dealer Wins";
-        disableButtons();
-    }
-
     playerDrawedCards.textContent = `Cards: ` + playerCards.join(', ');
     dealerDrawedCards.textContent = `Cards: ` + dealerCards.join(', ') + ', [hidden]';
 }
@@ -112,35 +130,19 @@ function revealDealerSecondCard() {
     if (dealerTotal <= 21 && dealerTotal <= playerTotal) {
         setTimeout(dealerTurnWithDelay, 500);
     } else {
-        determineOutcome(dealerTotal, playerTotal);
+        determineGameOutcome();
     }
 }
 
 function dealerTurnWithDelay() {
-    const dealerTotal = parseInt(dealerCount.textContent, 10);
-    const playerTotal = parseInt(playerCount.textContent, 10);
-
-    if (dealerTotal < 17) {
+    if (parseInt(dealerCount.textContent, 10) < 17) {
         setTimeout(() => {
             dealerHitCards();
             dealerTurnWithDelay();
         }, 500);
     } else {
-        determineOutcome(dealerTotal, playerTotal);
+        determineGameOutcome();
     }
-}
-
-function determineOutcome(dealerTotal, playerTotal) {
-    if (dealerTotal > 21) {
-        dealerCount.textContent = "Dealer Busted, Player Wins";
-    } else if (dealerTotal > playerTotal) {
-        dealerCount.textContent = `Dealer Wins (${dealerTotal})`;
-    } else if (dealerTotal < playerTotal) {
-        dealerCount.textContent = `Player Wins (${dealerTotal})`;
-    } else if (dealerTotal === playerTotal) {
-        dealerCount.textContent = "Push";
-    }
-    disableButtons();
 }
 
 function playerHitCards() {
