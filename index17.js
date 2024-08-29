@@ -47,6 +47,7 @@ console.log(cards);
 
 const playerCards = [cards.shift(), cards.shift()];
 const dealerCards = [cards.shift()];
+dealerCount.textContent = dealerCards.map(card => cardsObj[card]);
 
 let dealerStands = false;
 
@@ -66,7 +67,7 @@ function updatePlayerCount() {
     playerCount.textContent = sumOfCards;
     
     if (sumOfCards > 21) {
-        playerCount.textContent = "Busted, Dealer Wins";
+        playerCount.textContent = `Bust, Dealer Wins (${playerCount.textContent})`;
         disableButtons();
     } else if (sumOfCards === 21) {
         playerCount.textContent = "Blackjack! You hit 21";
@@ -152,7 +153,7 @@ function playerHitCards() {
 
     let firstElement = cards.shift();
     playerCards.push(firstElement);
-    playerDrawedCards.textContent = playerCards.join(', ');
+    playerDrawedCards.textContent = `Cards: ` + playerCards.join(', ');
     updatePlayerCount();
 }
 
@@ -161,11 +162,11 @@ function dealerHitCards() {
 
     let firstElement = cards.shift();
     dealerCards.push(firstElement);
-    dealerDrawedCards.textContent = dealerCards.join(', ');
+    dealerDrawedCards.textContent = `Cards: ` + dealerCards.join(', ');
     updateDealerCount();
 
     if (parseInt(dealerCount.textContent, 10) > 21) {
-        dealerCount.textContent = "Dealer Busted, Player Wins";
+        dealerCount.textContent = `Bust, Player Wins (${dealerCount.textContent})`;
         disableButtons();
     }
 }
