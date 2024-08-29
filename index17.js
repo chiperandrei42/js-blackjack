@@ -4,6 +4,7 @@ const playerDrawedCards = document.getElementById("playerDrawedCards");
 const dealerDrawedCards = document.getElementById("dealerDrawedCards");
 const hitBtn = document.getElementById("hitBtn");
 const standBtn = document.getElementById("standBtn");
+const restartBtn = document.getElementById("restartBtn");
 
 const cardsObj = {
     '2': 2,
@@ -184,9 +185,31 @@ standBtn.addEventListener('click', function() {
     }
 });
 
+restartBtn.addEventListener('click', function () {
+    cards.push(...playerCards, ...dealerCards);
+    fisherYates(cards);
+    playerCards.length = 0;
+    dealerCards.length = 0;
+
+    playerCards.push(cards.shift(), cards.shift());
+    dealerCards.push(cards.shift());
+
+    playerDrawedCards.textContent = `Cards: ` + playerCards.join(', ');
+    dealerDrawedCards.textContent = `Cards: ` + dealerCards.join(', ') + ', [hidden]';
+
+    updatePlayerCount()
+    updateDealerCount();
+    enableButtons();
+    dealerStands = false;
+})
+
 function disableButtons() {
     hitBtn.disabled = true;
     standBtn.disabled = true;
+}
+function enableButtons() {
+    hitBtn.disabled = false;
+    standBtn.disabled = false;
 }
 
 checkInitialGameState();
