@@ -43,6 +43,7 @@ function fisherYates(array) {
         [array[i], array[random]] = [array[random], array[i]];
     }
 }
+
 console.log(cards);
 
 const playerCards = [cards.shift(), cards.shift()];
@@ -59,27 +60,25 @@ function aceHandling(sum, cards) {
     return sum;
 }
 
-function updatePlayerCount() {
-    let convertedToNums = playerCards.map(card => cardsObj[card]);
+function calculateSum(cards) {
+    let convertedToNums = cards.map(card => cardsObj[card]);
     let sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
-    sumOfCards = aceHandling(sumOfCards, playerCards);
+    return aceHandling(sumOfCards, cards);
+}
+
+function updatePlayerCount() {
+    let sumOfCards = calculateSum(playerCards);
     playerCount.textContent = sumOfCards;
     
-    if (sumOfCards > 21) {
-        playerCount.textContent = "Busted, Dealer Wins";
-        disableButtons();
-    } else if (sumOfCards === 21) {
+    if (sumOfCards === 21) {
         playerCount.textContent = "Blackjack! You hit 21";
         disableButtons();
     }
 }
 
 function updateDealerCount() {
-    let convertedToNums = dealerCards.map(card => cardsObj[card]);
-    let sumOfCards = convertedToNums.reduce((accumulator, value) => accumulator + value, 0);
-    sumOfCards = aceHandling(sumOfCards, dealerCards);
+    let sumOfCards = calculateSum(dealerCards);
     dealerCount.textContent = sumOfCards;
-    
 }
 
 function checkInitialGameState() {
@@ -144,7 +143,6 @@ function determineOutcome(dealerTotal, playerTotal) {
     disableButtons();
 }
 
-
 function playerHitCards() {
     if (dealerStands) return;
 
@@ -163,11 +161,6 @@ function dealerHitCards() {
     dealerCards.push(firstElement);
     dealerDrawedCards.textContent = dealerCards.join(', ');
     updateDealerCount();
-
-    if (parseInt(dealerCount.textContent, 10) > 21) {
-        dealerCount.textContent = "Dealer Busted, Player Wins";
-        disableButtons();
-    }
 }
 
 hitBtn.addEventListener('click', function() {
